@@ -13,11 +13,11 @@
     Writes a transcript to C:\Windows\Temp\IntuneBootstrap-<timestamp>.log.
 
 .NOTES
-    Version : 1.1.1
+    Version : 1.1.2
     Ref     : https://learn.microsoft.com/en-us/autopilot/add-devices
 #>
 
-$ScriptVersion = '1.1.1'
+$ScriptVersion = '1.1.2'
 $ErrorActionPreference = "Stop"
 
 # --- 0. Verify Administrator Privileges ---
@@ -63,13 +63,18 @@ if (-not (Test-Path $PwshPath)) {
         }
         if ($HashAsset) {
             Write-Host "    Fetching SHA256 checksum from '$($HashAsset.name)'..." -ForegroundColor DarkGray
-            $HashFileContent = Invoke-RestMethod -Uri $HashAsset.browser_download_url -TimeoutSec 30
-            # Find the line matching our MSI filename (case-insensitive)
-            $MatchingLine = ($HashFileContent -split "`n") | Where-Object { $_ -match [regex]::Escape($MsiAsset.name) } | Select-Object -First 1
+            # Use WebRequest to get the raw byte content, avoiding IRM auto-parse quirks
+            $HashFileContent = (Invoke-WebRequest -Uri $HashAsset.browser_download_url -TimeoutSec 30 -UseBasicParsing).Content
+            # Split on \r\n or \n; match the MSI filename anywhere on the line (case-insensitive)
+            $MsiNamePattern = [regex]::Escape($MsiAsset.name)
+            $MatchingLine = ($HashFileContent -split '\r?\n') | Where-Object { $_ -imatch $MsiNamePattern } | Select-Object -First 1
             if (-not $MatchingLine) {
+                # Dump first few lines to help diagnose format issues
+                $Preview = ($HashFileContent -split '\r?\n') | Select-Object -First 5 | ForEach-Object { "      $_" }
+                Write-Host "    [DEBUG] First lines of $($HashAsset.name):`n$($Preview -join "`n")" -ForegroundColor DarkGray
                 throw "SHA256 checksum for '$($MsiAsset.name)' not found inside '$($HashAsset.name)'. Aborting."
             }
-            $ExpectedHash = ($MatchingLine -split '\s+')[0].Trim().ToUpper()
+            $ExpectedHash = ($MatchingLine.Trim() -split '\s+')[0].Trim().ToUpper()
             Write-Host "    Expected: $ExpectedHash" -ForegroundColor DarkGray
         }
         else {
