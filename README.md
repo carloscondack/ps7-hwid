@@ -10,18 +10,22 @@ In high-security tenants, standard PowerShell-based enrollment methods often fai
 
 ## The Solution
 This script automates the transition to a modern authentication stack by:
-1. **Downloading and installing PowerShell 7 (Core)** on the fly.
+1. **Downloading and installing PowerShell 7 (Core)** on the fly — supports both x64 and ARM64 devices.
 2. **Verifying integrity:** Downloads the official `.sha256` checksum file published by the PowerShell team alongside every release and hard-fails if the hashes don't match.
 3. **Handing off** the enrollment process to PowerShell 7, which natively supports modern web authentication (including FIDO2/YubiKeys).
 
 ## System Requirements
 
-* Windows 10 1809+ or Windows 11
-* Windows PowerShell 5.1 (built-in)
-* **Administrator privileges** (required for PowerShell 7 installation and PSGallery access)
-* Internet access to:
-  * `api.github.com` and `objects.githubusercontent.com` (PowerShell 7 download)
+* **OS:** Windows 10 1809+ or Windows 11
+* **Architecture:** x64 or ARM64 (Copilot+ PCs, Surface Pro X)
+* **PowerShell:** Windows PowerShell 5.1 (built-in — no pre-installation needed)
+* **Disk space:** ~300 MB free (PowerShell 7 MSI download + installation)
+* **curl:** built into Windows 10 1803+ — required only for the one-liner command
+* **Administrator privileges** — required for PowerShell 7 installation and PSGallery access
+* **Internet access** to:
+  * `api.github.com` and `objects.githubusercontent.com` (PowerShell 7 download + checksum)
   * `www.powershellgallery.com` (Autopilot script)
+* **Intune/Entra ID:** device must be targeted by an Autopilot deployment profile in your tenant
 
 ## Usage (OOBE)
 
