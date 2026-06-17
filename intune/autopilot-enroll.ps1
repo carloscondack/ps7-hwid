@@ -13,11 +13,11 @@
     Writes a transcript to C:\Windows\Temp\IntuneBootstrap-<timestamp>.log.
 
 .NOTES
-    Version : 1.1.0
+    Version : 1.1.1
     Ref     : https://learn.microsoft.com/en-us/autopilot/add-devices
 #>
 
-$ScriptVersion = '1.1.0'
+$ScriptVersion = '1.1.1'
 $ErrorActionPreference = "Stop"
 
 # --- 0. Verify Administrator Privileges ---
@@ -55,17 +55,25 @@ if (-not (Test-Path $PwshPath)) {
         if (-not $MsiAsset) { throw "Could not find $Arch MSI asset in latest release." }
 
         # 2. Fetch the official SHA256 checksum file published alongside the MSI.
-        #    The PowerShell team ships a "<assetname>.sha256" file with every release.
+        #    The PowerShell team ships a consolidated "hashes.sha256" file per release
+        #    (not individual per-file checksums) formatted as "<hash>  <filename>" per line.
         $HashAsset = $LatestRelease.assets | Where-Object { $_.name -eq "$($MsiAsset.name).sha256" } | Select-Object -First 1
+        if (-not $HashAsset) {
+            $HashAsset = $LatestRelease.assets | Where-Object { $_.name -eq 'hashes.sha256' } | Select-Object -First 1
+        }
         if ($HashAsset) {
-            Write-Host "    Fetching SHA256 checksum..." -ForegroundColor DarkGray
+            Write-Host "    Fetching SHA256 checksum from '$($HashAsset.name)'..." -ForegroundColor DarkGray
             $HashFileContent = Invoke-RestMethod -Uri $HashAsset.browser_download_url -TimeoutSec 30
-            # Checksum files are formatted as "<hash>  <filename>"
-            $ExpectedHash = ($HashFileContent -split '\s+')[0].Trim().ToUpper()
+            # Find the line matching our MSI filename (case-insensitive)
+            $MatchingLine = ($HashFileContent -split "`n") | Where-Object { $_ -match [regex]::Escape($MsiAsset.name) } | Select-Object -First 1
+            if (-not $MatchingLine) {
+                throw "SHA256 checksum for '$($MsiAsset.name)' not found inside '$($HashAsset.name)'. Aborting."
+            }
+            $ExpectedHash = ($MatchingLine -split '\s+')[0].Trim().ToUpper()
             Write-Host "    Expected: $ExpectedHash" -ForegroundColor DarkGray
         }
         else {
-            throw "Could not locate the SHA256 checksum asset for $($MsiAsset.name). Aborting."
+            throw "Could not locate a SHA256 checksum asset for $($MsiAsset.name). Aborting."
         }
 
         # 3. Download the MSI
