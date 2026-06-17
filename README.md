@@ -33,7 +33,7 @@ Perform these steps on a fresh Windows device during the initial setup screen.
 4. Run the following one-liner:
 
 ```cmd
-curl -L -o setup.ps1 https://raw.githubusercontent.com/carloscondack/ps7-hwid/main/intune-upload.ps1 && powershell -ExecutionPolicy Bypass -File setup.ps1
+powershell -ep bypass -c "irm https://raw.githubusercontent.com/carloscondack/ps7-hwid/main/run.ps1|iex"
 ```
 
 A transcript log is written to `C:\Windows\Temp\IntuneBootstrap-<timestamp>.log` for troubleshooting.
