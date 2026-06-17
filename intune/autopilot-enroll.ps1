@@ -13,20 +13,20 @@
     Writes a transcript to C:\Windows\Temp\IntuneBootstrap-<timestamp>.log.
 
 .NOTES
-    Version : 1.2.2
+    Version : 1.2.3
     Ref     : https://learn.microsoft.com/en-us/autopilot/add-devices
 #>
 
-$ScriptVersion = '1.2.2'
+$ScriptVersion = '1.2.3'
 $ErrorActionPreference = "Stop"
 
 # --- 0. Header ---
 Clear-Host
 Write-Host ""
-Write-Host "  ╔══════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "  ║       Intune Autopilot Enrollment Bootstrap          ║" -ForegroundColor Cyan
-Write-Host "  ╚══════════════════════════════════════════════════════╝" -ForegroundColor Cyan
-Write-Host "  v$ScriptVersion  ·  github.com/carloscondack/tools" -ForegroundColor DarkGray
+Write-Host "  +------------------------------------------------------+" -ForegroundColor Cyan
+Write-Host "  |       Intune Autopilot Enrollment Bootstrap          |" -ForegroundColor Cyan
+Write-Host "  +------------------------------------------------------+" -ForegroundColor Cyan
+Write-Host "  v$ScriptVersion  -  github.com/carloscondack/tools" -ForegroundColor DarkGray
 Write-Host ""
 
 # --- 1. Verify Administrator Privileges ---
@@ -234,9 +234,9 @@ if (Test-Path $PayloadFile) {
 }
 
 Write-Host ""
-Write-Host "  ╔══════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "  ║               Enrollment Complete                    ║" -ForegroundColor Green
-Write-Host "  ╚══════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host "  +------------------------------------------------------+" -ForegroundColor Green
+Write-Host "  |               Enrollment Complete                    |" -ForegroundColor Green
+Write-Host "  +------------------------------------------------------+" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Log saved to: $LogFile" -ForegroundColor DarkGray
 Write-Host ""
