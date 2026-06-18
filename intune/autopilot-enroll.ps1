@@ -4,8 +4,8 @@
 
 .DESCRIPTION
     Designed to run on Windows PowerShell 5.1 during OOBE. Installs PowerShell 7 if
-    absent — downloading the latest MSI from GitHub and verifying its SHA256 integrity
-    against the official checksum file published by the PowerShell team — then delegates
+    absent - downloading the latest MSI from GitHub and verifying its SHA256 integrity
+    against the official checksum file published by the PowerShell team - then delegates
     Autopilot enrollment to PS7 so that phishing-resistant MFA (FIDO2 / YubiKey /
     Windows Hello for Business) works correctly.
 
@@ -51,7 +51,7 @@ Write-Host ""
 $PwshPath = "C:\Program Files\PowerShell\7\pwsh.exe"
 
 if (-not (Test-Path $PwshPath)) {
-    Write-Host "  [>] PowerShell 7 not found — fetching latest release info..." -ForegroundColor Cyan
+    Write-Host "  [>] PowerShell 7 not found - fetching latest release info..." -ForegroundColor Cyan
 
     $TempMsi = $null
     try {
@@ -112,10 +112,10 @@ if (-not (Test-Path $PwshPath)) {
         Write-Host "  [OK] Integrity verified." -ForegroundColor Green
 
         # 5. Install Silently
-        Write-Host "  [>] Installing PowerShell 7 — please wait..." -ForegroundColor Cyan
+        Write-Host "  [>] Installing PowerShell 7 - please wait..." -ForegroundColor Cyan
         Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$TempMsi`" /quiet /norestart" -Wait
 
-        # 6. Verify the binary exists — msiexec /quiet can exit 0 on soft failures
+        # 6. Verify the binary exists - msiexec /quiet can exit 0 on soft failures
         if (-not (Test-Path $PwshPath)) {
             throw "msiexec completed but pwsh.exe not found at '$PwshPath'. Check logs for msiexec failure."
         }
@@ -151,12 +151,12 @@ $WebView2RegPaths = @(
 if ($WebView2RegPaths | Where-Object { Test-Path $_ }) {
     Write-Host "  [OK] WebView2 Runtime already installed." -ForegroundColor Green
 } else {
-    Write-Host "  [>] WebView2 Runtime not found — installing..." -ForegroundColor Cyan
+    Write-Host "  [>] WebView2 Runtime not found - installing..." -ForegroundColor Cyan
     $WebView2Installer = "$env:TEMP\MicrosoftEdgeWebView2Setup.exe"
     try {
         Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $WebView2Installer -TimeoutSec 60
 
-        # Verify Authenticode signature — more robust than a hardcoded hash since
+        # Verify Authenticode signature - more robust than a hardcoded hash since
         # the bootstrapper updates frequently but is always signed by Microsoft.
         $Sig = Get-AuthenticodeSignature -FilePath $WebView2Installer
         if ($Sig.Status -ne 'Valid') {
@@ -212,7 +212,7 @@ if (-not $ScriptInfo) {
 if ($ScriptInfo) {
     $ScriptPath = "$($ScriptInfo.InstalledLocation)\$ScriptName.ps1"
 
-    Write-Host "  [>] Starting authentication — a browser window will open shortly." -ForegroundColor Yellow
+    Write-Host "  [>] Starting authentication - a browser window will open shortly." -ForegroundColor Yellow
 
     & $ScriptPath -Online
 }
